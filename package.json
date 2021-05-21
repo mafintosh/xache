@@ -8,6 +8,9 @@
     "standard": "^16.0.3",
     "tape": "^5.2.2"
   },
+  "scripts": {
+    "test": "standard && tape test.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/mafintosh/xache.git"
