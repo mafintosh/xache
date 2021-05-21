@@ -1,0 +1,21 @@
+{
+  "name": "xache",
+  "version": "0.0.0",
+  "description": "Yet another auto expiring, max sizable cache",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
+    "standard": "^16.0.3",
+    "tape": "^5.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mafintosh/xache.git"
+  },
+  "author": "Mathias Buus (@mafintosh)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mafintosh/xache/issues"
+  },
+  "homepage": "https://github.com/mafintosh/xache"
+}
