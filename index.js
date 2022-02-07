@@ -5,6 +5,7 @@ module.exports = class MaxCache {
 
     this._latest = new Map()
     this._oldest = new Map()
+    this._retained = new Map()
     this._gced = false
     this._interval = null
 
@@ -16,15 +17,27 @@ module.exports = class MaxCache {
   }
 
   [Symbol.iterator] () {
-    return new Iterator(this._latest[Symbol.iterator](), this._oldest[Symbol.iterator]())
+    return new Iterator(
+      this._latest[Symbol.iterator](),
+      this._oldest[Symbol.iterator](),
+      this._retained[Symbol.iterator]()
+    )
   }
 
   keys () {
-    return new Iterator(this._latest.keys(), this._oldest.keys())
+    return new Iterator(
+      this._latest.keys(),
+      this._oldest.keys(),
+      this._retained.keys()
+    )
   }
 
   values () {
-    return new Iterator(this._latest.values(), this._oldest.values())
+    return new Iterator(
+      this._latest.values(),
+      this._oldest.values(),
+      this._retained.values()
+    )
   }
 
   destroy () {
@@ -38,32 +51,41 @@ module.exports = class MaxCache {
     this._gc()
   }
 
-  set (k, v) {
-    this._latest.set(k, v)
-    this._oldest.delete(k)
-    if (this._latest.size >= this.maxSize) this._gc()
+  set (k, v, options = {}) {
+    if (options.retain) this._retained.set(k, v)
+    else {
+      this._latest.set(k, v)
+      this._oldest.delete(k)
+      if (this._latest.size >= this.maxSize) this._gc()
+    }
+    return this
   }
 
   delete (k) {
-    return this._latest.delete(k) || this._oldest.delete(k)
+    return this._latest.delete(k) || this._oldest.delete(k) || this._retained.delete(k)
+  }
+
+  has (k) {
+    return this._latest.has(k) || this._oldest.has(k) || this._retained.has(k)
   }
 
   get (k) {
-    let bump = false
-    let v = this._latest.get(k)
-
-    if (!v) {
-      v = this._oldest.get(k)
-      if (!v) return null
-      bump = true
+    if (this._latest.has(k)) {
+      return this._latest.get(k)
     }
 
-    if (bump) {
+    if (this._oldest.has(k)) {
+      const v = this._oldest.get(k)
       this._latest.set(k, v)
       this._oldest.delete(k)
+      return v
     }
 
-    return v
+    if (this._retained.has(k)) {
+      return this._retained.get(k)
+    }
+
+    return null
   }
 
   _gcAuto () {
@@ -79,9 +101,8 @@ module.exports = class MaxCache {
 }
 
 class Iterator {
-  constructor (a, b) {
-    this.a = a
-    this.b = b
+  constructor (...iterators) {
+    this.iterators = iterators
   }
 
   [Symbol.iterator] () {
@@ -89,11 +110,17 @@ class Iterator {
   }
 
   next () {
-    if (this.a !== null) {
-      const n = this.a.next()
-      if (!n.done) return n
-      this.a = null
+    const it = this.iterators[0]
+
+    if (!it) return { done: true }
+
+    const n = it.next()
+
+    if (n.done) {
+      this.iterators.shift()
+      return this.next()
     }
-    return this.b.next()
+
+    return n
   }
 }
