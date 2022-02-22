@@ -16,28 +16,22 @@ module.exports = class MaxCache {
     }
   }
 
-  [Symbol.iterator] () {
-    return new Iterator(
-      this._latest[Symbol.iterator](),
-      this._oldest[Symbol.iterator](),
-      this._retained[Symbol.iterator]()
-    )
+  * [Symbol.iterator] () {
+    for (const it of [this._latest, this._oldest, this._retained]) {
+      yield * it
+    }
   }
 
-  keys () {
-    return new Iterator(
-      this._latest.keys(),
-      this._oldest.keys(),
-      this._retained.keys()
-    )
+  * keys () {
+    for (const it of [this._latest, this._oldest, this._retained]) {
+      yield * it.keys()
+    }
   }
 
-  values () {
-    return new Iterator(
-      this._latest.values(),
-      this._oldest.values(),
-      this._retained.values()
-    )
+  * values () {
+    for (const it of [this._latest, this._oldest, this._retained]) {
+      yield * it.values()
+    }
   }
 
   destroy () {
@@ -97,30 +91,5 @@ module.exports = class MaxCache {
     this._gced = true
     this._oldest = this._latest
     this._latest = new Map()
-  }
-}
-
-class Iterator {
-  constructor (...iterators) {
-    this.iterators = iterators
-  }
-
-  [Symbol.iterator] () {
-    return this
-  }
-
-  next () {
-    const it = this.iterators[0]
-
-    if (!it) return { done: true }
-
-    const n = it.next()
-
-    if (n.done) {
-      this.iterators.shift()
-      return this.next()
-    }
-
-    return n
   }
 }
