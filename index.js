@@ -45,13 +45,16 @@ module.exports = class MaxCache {
     this._gc()
   }
 
-  set (k, v, options = {}) {
-    if (options.retain) this._retained.set(k, v)
-    else {
-      this._latest.set(k, v)
-      this._oldest.delete(k)
-      if (this._latest.size >= this.maxSize) this._gc()
-    }
+  set (k, v) {
+    this._latest.set(k, v)
+    this._oldest.delete(k) || this._retained.delete(k)
+    if (this._latest.size >= this.maxSize) this._gc()
+    return this
+  }
+
+  retain (k, v) {
+    this._retained.set(k, v)
+    this._latest.delete(k) || this._oldest.delete(k)
     return this
   }
 

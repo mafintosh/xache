@@ -42,18 +42,44 @@ tape('falsy values', function (t) {
   t.end()
 })
 
-tape('retained', function (t) {
+tape('retain', function (t) {
   const c = new Xache({
     maxSize: 4
   })
 
-  c.set(1, true, { retain: true })
+  c.retain(1, true)
 
   for (let i = 2; i < 10; i++) {
     c.set(i, true)
   }
 
   t.same([...c], [[6, true], [7, true], [8, true], [9, true], [1, true]])
+
+  t.end()
+})
+
+tape('retain + set + get', function (t) {
+  const c = new Xache({
+    maxSize: 4
+  })
+
+  c.retain(1, true)
+  c.set(1, false)
+
+  t.is(c.get(1), false)
+
+  t.end()
+})
+
+tape('set + retain + get', function (t) {
+  const c = new Xache({
+    maxSize: 4
+  })
+
+  c.set(1, false)
+  c.retain(1, true)
+
+  t.is(c.get(1), true)
 
   t.end()
 })
