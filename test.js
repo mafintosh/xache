@@ -66,7 +66,7 @@ tape('retain + set + get', function (t) {
   c.retain(1, true)
   c.set(1, false)
 
-  t.is(c.get(1), false)
+  t.is(c.get(1), true)
 
   t.end()
 })
