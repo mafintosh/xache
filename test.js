@@ -83,3 +83,17 @@ tape('set + retain + get', function (t) {
 
   t.end()
 })
+
+tape('retain + clear + get', function (t) {
+  const c = new Xache({
+    maxSize: 4
+  })
+
+  c.retain(1, true)
+  t.is(c.get(1), true)
+
+  c.clear()
+  t.is(c.get(1), undefined)
+
+  t.end()
+})

@@ -41,8 +41,10 @@ module.exports = class MaxCache {
   }
 
   clear () {
-    this._gc()
-    this._gc()
+    this._gced = true
+    this._latest.clear()
+    this._oldest.clear()
+    this._retained.clear()
   }
 
   set (k, v) {
