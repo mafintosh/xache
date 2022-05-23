@@ -13,7 +13,10 @@ const Xache = require('xache')
 
 const cache = new Xache({
   maxSize: 10, // at max (ish) have 10 entries
-  maxAge: 100 // auto expire entries after (ish) 100ms
+  maxAge: 100, // auto expire entries after (ish) 100ms
+  createMap () { // optional function to create backing storage
+    return new Map()
+  }
 })
 
 // When maxSize is hit, the oldest entries are removed
