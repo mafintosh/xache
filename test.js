@@ -1,7 +1,7 @@
-const tape = require('tape')
-const Xache = require('./')
+const test = require('brittle')
+const Xache = require('.')
 
-tape('basic', function (t) {
+test('basic', function (t) {
   const c = new Xache({
     maxSize: 4
   })
@@ -11,24 +11,23 @@ tape('basic', function (t) {
   c.set(3, true)
   c.set(4, true)
 
-  t.same([...c], [[1, true], [2, true], [3, true], [4, true]])
+  t.alike([...c], [[1, true], [2, true], [3, true], [4, true]])
 
   c.set(5, true)
 
-  t.same([...c], [[5, true], [1, true], [2, true], [3, true], [4, true]], 'bumped the generations')
+  t.alike([...c], [[5, true], [1, true], [2, true], [3, true], [4, true]], 'bumped the generations')
 
   c.set(2, true)
 
-  t.same([...c], [[5, true], [2, true], [1, true], [3, true], [4, true]], 'bumped the key')
+  t.alike([...c], [[5, true], [2, true], [1, true], [3, true], [4, true]], 'bumped the key')
 
   c.set(6, true)
   c.set(7, true)
 
-  t.same([...c], [[5, true], [2, true], [6, true], [7, true]])
-  t.end()
+  t.alike([...c], [[5, true], [2, true], [6, true], [7, true]])
 })
 
-tape('falsy values', function (t) {
+test('falsy values', function (t) {
   const c = new Xache({
     maxSize: 4
   })
@@ -36,13 +35,11 @@ tape('falsy values', function (t) {
   for (const v of [null, undefined, false, 0, NaN, '']) {
     c.set(1, v)
     t.ok(c.has(1))
-    t.same(c.get(1), v)
+    t.alike(c.get(1), v)
   }
-
-  t.end()
 })
 
-tape('retain', function (t) {
+test('retain', function (t) {
   const c = new Xache({
     maxSize: 4
   })
@@ -53,12 +50,10 @@ tape('retain', function (t) {
     c.set(i, true)
   }
 
-  t.same([...c], [[6, true], [7, true], [8, true], [9, true], [1, true]])
-
-  t.end()
+  t.alike([...c], [[6, true], [7, true], [8, true], [9, true], [1, true]])
 })
 
-tape('retain + set + get', function (t) {
+test('retain + set + get', function (t) {
   const c = new Xache({
     maxSize: 4
   })
@@ -67,11 +62,9 @@ tape('retain + set + get', function (t) {
   c.set(1, false)
 
   t.is(c.get(1), true)
-
-  t.end()
 })
 
-tape('set + retain + get', function (t) {
+test('set + retain + get', function (t) {
   const c = new Xache({
     maxSize: 4
   })
@@ -80,11 +73,9 @@ tape('set + retain + get', function (t) {
   c.retain(1, true)
 
   t.is(c.get(1), true)
-
-  t.end()
 })
 
-tape('retain + clear + get', function (t) {
+test('retain + clear + get', function (t) {
   const c = new Xache({
     maxSize: 4
   })
@@ -93,7 +84,5 @@ tape('retain + clear + get', function (t) {
   t.is(c.get(1), true)
 
   c.clear()
-  t.is(c.get(1), undefined)
-
-  t.end()
+  t.is(c.get(1), null)
 })

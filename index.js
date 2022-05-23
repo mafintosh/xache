@@ -85,6 +85,8 @@ module.exports = class MaxCache {
     if (this._retained.has(k)) {
       return this._retained.get(k)
     }
+
+    return null
   }
 
   _gcAuto () {
