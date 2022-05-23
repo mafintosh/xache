@@ -6,6 +6,7 @@ module.exports = class MaxCache {
     this._createMap = createMap || defaultCreateMap
     this._latest = this._createMap()
     this._oldest = this._createMap()
+    this._retained = this._createMap()
     this._gced = false
     this._interval = null
 
@@ -16,16 +17,22 @@ module.exports = class MaxCache {
     }
   }
 
-  [Symbol.iterator] () {
-    return new Iterator(this._latest[Symbol.iterator](), this._oldest[Symbol.iterator]())
+  * [Symbol.iterator] () {
+    for (const it of [this._latest, this._oldest, this._retained]) {
+      yield * it
+    }
   }
 
-  keys () {
-    return new Iterator(this._latest.keys(), this._oldest.keys())
+  * keys () {
+    for (const it of [this._latest, this._oldest, this._retained]) {
+      yield * it.keys()
+    }
   }
 
-  values () {
-    return new Iterator(this._latest.values(), this._oldest.values())
+  * values () {
+    for (const it of [this._latest, this._oldest, this._retained]) {
+      yield * it.values()
+    }
   }
 
   destroy () {
@@ -35,36 +42,49 @@ module.exports = class MaxCache {
   }
 
   clear () {
-    this._gc()
-    this._gc()
+    this._gced = true
+    this._latest.clear()
+    this._oldest.clear()
+    this._retained.clear()
   }
 
   set (k, v) {
+    if (this._retained.has(k)) return this
     this._latest.set(k, v)
-    this._oldest.delete(k)
+    this._oldest.delete(k) || this._retained.delete(k)
     if (this._latest.size >= this.maxSize) this._gc()
+    return this
+  }
+
+  retain (k, v) {
+    this._retained.set(k, v)
+    this._latest.delete(k) || this._oldest.delete(k)
+    return this
   }
 
   delete (k) {
-    return this._latest.delete(k) || this._oldest.delete(k)
+    return this._latest.delete(k) || this._oldest.delete(k) || this._retained.delete(k)
+  }
+
+  has (k) {
+    return this._latest.has(k) || this._oldest.has(k) || this._retained.has(k)
   }
 
   get (k) {
-    let bump = false
-    let v = this._latest.get(k)
-
-    if (!v) {
-      v = this._oldest.get(k)
-      if (!v) return null
-      bump = true
+    if (this._latest.has(k)) {
+      return this._latest.get(k)
     }
 
-    if (bump) {
+    if (this._oldest.has(k)) {
+      const v = this._oldest.get(k)
       this._latest.set(k, v)
       this._oldest.delete(k)
+      return v
     }
 
-    return v
+    if (this._retained.has(k)) {
+      return this._retained.get(k)
+    }
   }
 
   _gcAuto () {
@@ -76,26 +96,6 @@ module.exports = class MaxCache {
     this._gced = true
     this._oldest = this._latest
     this._latest = this._createMap()
-  }
-}
-
-class Iterator {
-  constructor (a, b) {
-    this.a = a
-    this.b = b
-  }
-
-  [Symbol.iterator] () {
-    return this
-  }
-
-  next () {
-    if (this.a !== null) {
-      const n = this.a.next()
-      if (!n.done) return n
-      this.a = null
-    }
-    return this.b.next()
   }
 }
 
