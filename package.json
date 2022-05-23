@@ -1,6 +1,6 @@
 {
   "name": "xache",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Yet another auto expiring, max sizable cache",
   "main": "index.js",
   "dependencies": {},
