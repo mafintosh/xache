@@ -1,7 +1,8 @@
 module.exports = class MaxCache {
-  constructor ({ maxSize, maxAge, createMap }) {
+  constructor ({ maxSize, maxAge, createMap, ongc }) {
     this.maxSize = maxSize
     this.maxAge = maxAge
+    this.ongc = ongc || null
 
     this._createMap = createMap || defaultCreateMap
     this._latest = this._createMap()
@@ -96,6 +97,7 @@ module.exports = class MaxCache {
 
   _gc () {
     this._gced = true
+    if (this.ongc !== null && this._oldest.size > 0) this.ongc(this._oldest)
     this._oldest = this._latest
     this._latest = this._createMap()
   }

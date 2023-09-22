@@ -86,3 +86,23 @@ test('retain + clear + get', function (t) {
   c.clear()
   t.is(c.get(1), null)
 })
+
+test('ongc', function (t) {
+  t.plan(1)
+
+  const c = new Xache({
+    maxSize: 4,
+    ongc (map) {
+      t.alike(map, new Map([[1, true], [2, true], [3, true], [4, true]]))
+    }
+  })
+
+  c.set(1, true)
+  c.set(2, true)
+  c.set(3, true)
+  c.set(4, true)
+  c.set(5, true)
+  c.set(6, true)
+  c.set(7, true)
+  c.set(8, true)
+})
