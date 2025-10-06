@@ -13,8 +13,7 @@
   },
   "scripts": {
     "format": "prettier --write .",
-    "lint": "prettier --check .",
-    "test": "brittle test.js"
+    "test": "prettier --check . && brittle test.js"
   },
   "repository": {
     "type": "git",
