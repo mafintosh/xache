@@ -1,5 +1,5 @@
 module.exports = class MaxCache {
-  constructor ({ maxSize, maxAge, createMap, ongc }) {
+  constructor({ maxSize, maxAge, createMap, ongc }) {
     this.maxSize = maxSize
     this.maxAge = maxAge
     this.ongc = ongc || null
@@ -12,44 +12,44 @@ module.exports = class MaxCache {
     this._interval = null
 
     if (this.maxAge > 0 && this.maxAge < Infinity) {
-      const tick = Math.ceil(2 / 3 * this.maxAge)
+      const tick = Math.ceil((2 / 3) * this.maxAge)
       this._interval = setInterval(this._gcAuto.bind(this), tick)
       if (this._interval.unref) this._interval.unref()
     }
   }
 
-  * [Symbol.iterator] () {
+  *[Symbol.iterator]() {
     for (const it of [this._latest, this._oldest, this._retained]) {
-      yield * it
+      yield* it
     }
   }
 
-  * keys () {
+  *keys() {
     for (const it of [this._latest, this._oldest, this._retained]) {
-      yield * it.keys()
+      yield* it.keys()
     }
   }
 
-  * values () {
+  *values() {
     for (const it of [this._latest, this._oldest, this._retained]) {
-      yield * it.values()
+      yield* it.values()
     }
   }
 
-  destroy () {
+  destroy() {
     this.clear()
     clearInterval(this._interval)
     this._interval = null
   }
 
-  clear () {
+  clear() {
     this._gced = true
     this._latest.clear()
     this._oldest.clear()
     this._retained.clear()
   }
 
-  set (k, v) {
+  set(k, v) {
     if (this._retained.has(k)) return this
     this._latest.set(k, v)
     this._oldest.delete(k) || this._retained.delete(k)
@@ -57,21 +57,25 @@ module.exports = class MaxCache {
     return this
   }
 
-  retain (k, v) {
+  retain(k, v) {
     this._retained.set(k, v)
     this._latest.delete(k) || this._oldest.delete(k)
     return this
   }
 
-  delete (k) {
-    return this._latest.delete(k) || this._oldest.delete(k) || this._retained.delete(k)
+  delete(k) {
+    return (
+      this._latest.delete(k) ||
+      this._oldest.delete(k) ||
+      this._retained.delete(k)
+    )
   }
 
-  has (k) {
+  has(k) {
     return this._latest.has(k) || this._oldest.has(k) || this._retained.has(k)
   }
 
-  get (k) {
+  get(k) {
     if (this._latest.has(k)) {
       return this._latest.get(k)
     }
@@ -90,12 +94,12 @@ module.exports = class MaxCache {
     return null
   }
 
-  _gcAuto () {
+  _gcAuto() {
     if (!this._gced) this._gc()
     this._gced = false
   }
 
-  _gc () {
+  _gc() {
     this._gced = true
     if (this.ongc !== null && this._oldest.size > 0) this.ongc(this._oldest)
     this._oldest = this._latest
@@ -103,6 +107,6 @@ module.exports = class MaxCache {
   }
 }
 
-function defaultCreateMap () {
+function defaultCreateMap() {
   return new Map()
 }

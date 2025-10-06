@@ -11,20 +11,56 @@ test('basic', function (t) {
   c.set(3, true)
   c.set(4, true)
 
-  t.alike([...c], [[1, true], [2, true], [3, true], [4, true]])
+  t.alike(
+    [...c],
+    [
+      [1, true],
+      [2, true],
+      [3, true],
+      [4, true]
+    ]
+  )
 
   c.set(5, true)
 
-  t.alike([...c], [[5, true], [1, true], [2, true], [3, true], [4, true]], 'bumped the generations')
+  t.alike(
+    [...c],
+    [
+      [5, true],
+      [1, true],
+      [2, true],
+      [3, true],
+      [4, true]
+    ],
+    'bumped the generations'
+  )
 
   c.set(2, true)
 
-  t.alike([...c], [[5, true], [2, true], [1, true], [3, true], [4, true]], 'bumped the key')
+  t.alike(
+    [...c],
+    [
+      [5, true],
+      [2, true],
+      [1, true],
+      [3, true],
+      [4, true]
+    ],
+    'bumped the key'
+  )
 
   c.set(6, true)
   c.set(7, true)
 
-  t.alike([...c], [[5, true], [2, true], [6, true], [7, true]])
+  t.alike(
+    [...c],
+    [
+      [5, true],
+      [2, true],
+      [6, true],
+      [7, true]
+    ]
+  )
 })
 
 test('falsy values', function (t) {
@@ -50,7 +86,16 @@ test('retain', function (t) {
     c.set(i, true)
   }
 
-  t.alike([...c], [[6, true], [7, true], [8, true], [9, true], [1, true]])
+  t.alike(
+    [...c],
+    [
+      [6, true],
+      [7, true],
+      [8, true],
+      [9, true],
+      [1, true]
+    ]
+  )
 })
 
 test('retain + set + get', function (t) {
@@ -92,8 +137,16 @@ test('ongc', function (t) {
 
   const c = new Xache({
     maxSize: 4,
-    ongc (map) {
-      t.alike(map, new Map([[1, true], [2, true], [3, true], [4, true]]))
+    ongc(map) {
+      t.alike(
+        map,
+        new Map([
+          [1, true],
+          [2, true],
+          [3, true],
+          [4, true]
+        ])
+      )
     }
   })
 
