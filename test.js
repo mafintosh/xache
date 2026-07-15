@@ -175,3 +175,19 @@ test('get size', function (t) {
 
   t.is(c.size, 4)
 })
+
+test('get size - can exceed maxSize', function (t) {
+  const c = new Xache({
+    maxSize: 4
+  })
+
+  c.set(1, true)
+  c.set(2, true)
+  c.set(3, true)
+  c.set(4, true)
+  c.set(5, true)
+  c.set(6, true)
+  c.set(7, true)
+
+  t.is(c.size, 7)
+})
